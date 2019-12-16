@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Popover, { Align, Justify, PopoverProps } from '@leafygreen-ui/popover';
 import { useEventListener, useEscapeKey } from '@leafygreen-ui/hooks';
@@ -88,30 +88,80 @@ function Menu({
 }: MenuProps) {
   const refs: Array<HTMLElement> = [];
   const hasSetInitialFocus = useRef(false);
+  const [currentSubMenu, setCurrentSubMenu] = useState<React.ReactElement<
+    HTMLLIElement
+  > | null>(null);
+
+  // When a SubMenu becomes open, it's set to currentSubMenu, and we focus on the first child.
+  useEffect(() => {
+    if (!currentSubMenu) {
+      return;
+    }
+
+    const focusedRefIndex = refs.indexOf(focused);
+    const subMenuFirstChild = refs[focusedRefIndex + 1];
+
+    if (subMenuFirstChild) {
+      subMenuFirstChild.focus();
+    }
+  }, [currentSubMenu]);
+
+  const setRef = (ref: HTMLElement) => {
+    if (ref == null) {
+      return;
+    }
+
+    refs.push(ref);
+
+    if (open && refs.length === 1 && hasSetInitialFocus.current === false) {
+      setFocus(refs[0]);
+      hasSetInitialFocus.current = true;
+    }
+  };
 
   function updateChildren(children: any): Array<React.ReactElement> {
-    return React.Children.map(children, child => {
+    return React.Children.map(children, (child, index) => {
+      const onFocus = (e: Event) => {
+        setFocused(e.target as HTMLElement);
+        child.props.onFocus?.(e);
+      };
+
+      if (isComponentType(child, 'SubMenu') && !child.props.disabled) {
+        const isCurrentSubMenu = currentSubMenu === child;
+
+        return React.cloneElement(child, {
+          ref: setRef,
+          open: isCurrentSubMenu,
+          setOpen: (state: boolean) => {
+            if (isCurrentSubMenu === state) {
+              return;
+            }
+
+            setFocus(refs[index]);
+
+            setCurrentSubMenu(state ? child : null);
+          },
+          onKeyDown: (e: KeyboardEvent) => {
+            if (e.keyCode === keyMap.ArrowLeft) {
+              setCurrentSubMenu(null);
+            }
+
+            if (e.keyCode === keyMap.ArrowRight) {
+              setCurrentSubMenu(child);
+            }
+          },
+          onFocus,
+          children: updateChildren(child.props.children),
+        });
+      }
+
       if (
         (isComponentType(child, 'MenuItem') && !child.props.disabled) ||
         isComponentType(child, 'FocusableMenuItem')
       ) {
         return React.cloneElement(child, {
-          ref: (ref: HTMLElement) => {
-            refs.push(ref);
-            if (
-              open &&
-              refs.length === 1 &&
-              hasSetInitialFocus.current === false
-            ) {
-              refs[0].focus();
-              setFocused(refs[0]);
-              hasSetInitialFocus.current = true;
-            }
-          },
-          onFocus: (e: Event) => {
-            setFocused(e.target as HTMLElement);
-            child.props.onFocus?.(e);
-          },
+          ref: setRef,
+          onFocus,
         });
       }
 
@@ -134,6 +184,11 @@ function Menu({
   const setOpen = isControlled ? controlledSetOpen : uncontrolledSetOpen;
 
   const popoverRef: React.RefObject<HTMLUListElement> = useRef(null);
+
+  const setFocus = el => {
+    setFocused(el);
+    el?.focus();
+  };
 
   useMemo(() => {
     if (open === false) {
@@ -189,28 +244,24 @@ function Menu({
     switch (e.keyCode) {
       case keyMap.ArrowDown:
         refToFocus = refs[(refs.indexOf(focused!) + 1) % refs.length];
-        refToFocus.focus();
-        setFocused(refToFocus);
+        setFocus(refToFocus);
         break;
 
       case keyMap.ArrowUp:
         refToFocus =
           refs[(refs.indexOf(focused!) - 1 + refs.length) % refs.length];
-        setFocused(refToFocus);
-        refToFocus.focus();
+        setFocus(refToFocus);
         break;
 
       case keyMap.Tab:
         if (!e.shiftKey && trapLastMenuItem(filteredRefs)) {
           e.preventDefault();
-          setFocused(refs[0]);
-          refs[0].focus();
+          setFocus(refs[0]);
         }
 
         if (e.shiftKey && trapFirstMenuItem()) {
           e.preventDefault();
-          filteredRefs[filteredRefs.length - 1].focus();
-          setFocused(filteredRefs[filteredRefs.length - 1]);
+          setFocus(filteredRefs[filteredRefs.length - 1]);
         }
 
         break;
@@ -218,8 +269,7 @@ function Menu({
       case keyMap.Space:
       case keyMap.Enter:
         if (!open) {
-          setFocused(refs[0]);
-          refs[0].focus();
+          setFocus(refs[0]);
         }
         break;
     }

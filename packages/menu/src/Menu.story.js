@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { storiesOf } from '@storybook/react';
 import { select, boolean } from '@storybook/addon-knobs';
-import { Menu, MenuSeparator, MenuItem } from './index';
+import { Menu, MenuSeparator, MenuItem } from '.';
+import SubMenu from './SubMenu';
 import { Align, Justify } from '@leafygreen-ui/popover';
 
 function Uncontrolled() {
@@ -52,6 +53,29 @@ function Controlled() {
   );
 }
 
+function Test() {
+  return (
+    <Menu trigger={<button>trigger</button>}>
+      <MenuItem>test 1</MenuItem>
+      <SubMenu title="Cloud" description="https://google.com">
+        <MenuItem>Test 1</MenuItem>
+        <MenuItem>Test 2</MenuItem>
+      </SubMenu>
+      <MenuItem>test 2</MenuItem>
+      <SubMenu title="Support">
+        <MenuItem>Test 1</MenuItem>
+      </SubMenu>
+      <MenuItem>test 3</MenuItem>
+      <SubMenu title="Support">
+        <MenuItem>Test 1</MenuItem>
+        <MenuItem>Test 2</MenuItem>
+        <MenuItem>Test 3</MenuItem>
+      </SubMenu>
+    </Menu>
+  );
+}
+
 storiesOf('Menu', module)
   .add('Controlled', () => <Controlled />)
-  .add('Uncontrolled', () => <Uncontrolled />);
+  .add('Uncontrolled', () => <Uncontrolled />)
+  .add('Test', () => <Test />);

@@ -4,6 +4,7 @@ import Button from '@leafygreen-ui/button';
 import Icon from '@leafygreen-ui/icon';
 import {
   Menu,
+  SubMenu,
   MenuItem,
   MenuSeparator,
   FocusableMenuItem,
@@ -96,13 +97,6 @@ const activeMenuButtonStyle = css`
   background-color: ${uiColors.gray.light2};
 `;
 
-const nameStyle = css`
-  font-size: 16px;
-  color: ${uiColors.gray.dark2};
-  font-weight: bold;
-  margin: 4px 0px 2px;
-`;
-
 const truncate = css`
   white-space: nowrap;
   overflow: hidden;
@@ -120,31 +114,32 @@ const openIconStyle = css`
   color: ${uiColors.gray.base};
 `;
 
-const headerPadding = css`
-  padding-top: 20px;
-  padding-left: 20px;
-  padding-right: 20px;
+const headerStyle = css`
+  padding: 25px 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: ${uiColors.gray.dark3};
+  color: ${uiColors.white};
 `;
 
-const accountButtonStyle = css`
-  margin-top: 12px;
-  margin-left: 20px;
-  width: calc(100% - 40px);
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 14px;
+const nameStyle = css`
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 22px;
+  margin: 0px;
 `;
 
 const descriptionStyle = css`
-  margin: 0px;
   font-size: 12px;
-  color: ${uiColors.gray.dark1};
+  line-height: 14px;
   text-decoration: none;
+  margin-top: 0px;
+  margin-bottom: 15px;
 `;
 
-const logoutContainerHeight = css`
-  height: 46px;
+const logoutContainer = css`
+  height: 56px;
 `;
 
 const menuItems = [
@@ -153,20 +148,28 @@ const menuItems = [
     description: 'cloud.mongodb.com',
     href: 'https://cloud.mongodb.com',
     slug: 'atlas',
+    subMenu: [
+      'User Preferences',
+      'Invitations',
+      'Organizations',
+      'Two-Factor Authorization',
+    ],
   },
   {
     displayName: 'University',
     description: 'university.mongodb.com',
     href: 'https://university.mongodb.com',
     slug: 'university',
+    subMenu: ['Video Preferences'],
   },
   {
     displayName: 'Cloud Support',
     description: 'support.mongodb.com',
     href: 'https://support.mongodb.com',
     slug: 'support',
+    subMenu: ['User Preferences'],
   },
-] as const;
+];
 
 export const Product = {
   Atlas: 'atlas',
@@ -247,37 +250,44 @@ function MongoMenu({
         />
       </div>
 
-      <Menu open={open} setOpen={setOpen}>
-        <div className={headerPadding}>
+      <Menu
+        open={open}
+        setOpen={setOpen}
+        className={css`
+          width: 300px;
+        `}
+      >
+        <div className={headerStyle}>
           <h3 className={cx(nameStyle, truncate)}>{name}</h3>
           <p className={cx(descriptionStyle, truncate)}>{email}</p>
+          <FocusableMenuItem>
+            <Button href={accountURL} as="a">
+              MongoDB Account
+            </Button>
+          </FocusableMenuItem>
         </div>
-        <FocusableMenuItem>
-          <Button
-            size="small"
-            href={accountURL}
-            className={accountButtonStyle}
-            as="a"
-          >
-            MongoDB Account
-          </Button>
-        </FocusableMenuItem>
         <MenuSeparator />
-        {menuItems.map(el => (
-          <MenuItem
-            onClick={onProductChange}
-            key={el.displayName}
-            active={el.slug === activeProduct}
-            href={el.href}
-            description={el.description}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {el.displayName}
-          </MenuItem>
-        ))}
+        {menuItems.map(el => {
+          console.log(el.subMenu);
+          return (
+            <SubMenu
+              onClick={onProductChange}
+              key={el.displayName}
+              active={el.slug === activeProduct}
+              href={el.href}
+              description={el.description}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={el.displayName}
+            >
+              {el.subMenu.map(sub => (
+                <MenuItem key={sub}>{sub}</MenuItem>
+              ))}
+            </SubMenu>
+          );
+        })}
         <MenuSeparator />
-        <MenuItem onClick={onLogout} className={cx(logoutContainerHeight)}>
+        <MenuItem onClick={onLogout} className={logoutContainer}>
           Logout
         </MenuItem>
       </Menu>

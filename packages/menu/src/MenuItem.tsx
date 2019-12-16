@@ -3,72 +3,16 @@ import PropTypes from 'prop-types';
 import { HTMLElementProps, createDataProp } from '@leafygreen-ui/lib';
 import { css, cx } from '@leafygreen-ui/emotion';
 import { uiColors } from '@leafygreen-ui/palette';
+import {
+  menuItemContainerStyle,
+  activeMenuItemContainerStyle,
+  disabledMenuItemContainerStyle,
+} from './utils';
 
 const menuItemContainer = createDataProp('menu-item-container');
 
-const indentation = 15;
-
-const containerStyle = css`
+const menuItemHeight = css`
   min-height: 36px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-left: ${indentation}px;
-  text-decoration: none;
-  cursor: pointer;
-  text-decoration: none;
-  position: relative;
-  transition: background-color 150ms ease-in-out;
-  border: none;
-  margin: unset;
-  width: 100%;
-  font-family: Akzidenz, ‘Helvetica Neue’, Helvetica, Arial, sans-serif;
-  box-sizing: border-box;
-  background: ${uiColors.white};
-  text-align: left;
-
-  &:before {
-    content: '';
-    position: absolute;
-    width: 3px;
-    top: 0;
-    bottom: 0;
-    left: -1px;
-    background-color: transparent;
-    transition: background-color 150ms ease-in-out;
-  }
-
-  &:hover {
-    text-decoration: none;
-    background-color: ${uiColors.gray.light3};
-
-    &:before {
-      background-color: ${uiColors.gray.light2};
-    }
-  }
-
-  &:active {
-    background-color: ${uiColors.gray.light2};
-
-    &:before {
-      background-color: ${uiColors.gray.light1};
-    }
-  }
-
-  &:focus {
-    outline: none;
-    text-decoration: none;
-    background-color: ${uiColors.blue.light3};
-    color: ${uiColors.blue.dark3};
-
-    &:before {
-      background-color: #63b0d0;
-    }
-  }
-
-  &::-moz-focus-inner {
-    border: 0;
-  }
 `;
 
 const linkStyle = css`
@@ -103,43 +47,6 @@ const descriptionTextStyle = css`
 
   ${menuItemContainer.selector}:focus & {
     color: ${uiColors.blue.dark2};
-  }
-`;
-
-const activeStyle = css`
-  background-color: ${uiColors.green.light3};
-
-  &:before {
-    background-color: ${uiColors.green.base};
-  }
-
-  &:hover {
-    background-color: ${uiColors.green.light3};
-    color: ${uiColors.green.dark3};
-
-    &:before {
-      background-color: ${uiColors.green.base};
-    }
-  }
-
-  &:focus {
-    outline: none;
-    background-color: ${uiColors.blue.light3};
-    color: ${uiColors.blue.dark3};
-
-    &:before {
-      background-color: #63b0d0;
-    }
-  }
-`;
-
-const disabledStyle = css`
-  cursor: not-allowed;
-  pointer-events: none;
-  background-color: ${uiColors.gray.light3};
-
-  &:hover:before {
-    background-color: unset;
   }
 `;
 
@@ -212,11 +119,12 @@ const MenuItem = React.forwardRef(
           {...rest}
           {...menuItemContainer.prop}
           className={cx(
-            containerStyle,
+            menuItemContainerStyle,
+            menuItemHeight,
             linkStyle,
             {
-              [activeStyle]: active,
-              [disabledStyle]: disabled,
+              [activeMenuItemContainerStyle]: active,
+              [disabledMenuItemContainerStyle]: disabled,
             },
             className,
           )}

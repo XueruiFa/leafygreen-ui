@@ -174,7 +174,7 @@ const iconStyle = css`
  * @param props.ariaLabel Required prop that will be passed to `aria-label` attribute
  */
 
-function IconButton(props: IconButtonProps) {
+const IconButton = React.forwardRef((props: IconButtonProps, ref) => {
   const {
     variant = 'light',
     disabled = false,
@@ -191,6 +191,7 @@ function IconButton(props: IconButtonProps) {
       href={href ? href : undefined}
       aria-disabled={disabled}
       aria-label={ariaLabel}
+      ref={ref}
       className={cx(
         removeButtonStyle,
         baseIconButtonStyle,
@@ -210,10 +211,11 @@ function IconButton(props: IconButtonProps) {
   }
 
   return renderIconButton();
-}
+});
 
 IconButton.displayName = 'IconButton';
 
+// @ts-ignore: https://github.com/DefinitelyTyped/DefinitelyTyped/issues/37660
 IconButton.propTypes = {
   variant: PropTypes.oneOf(Object.values(Variant)),
   className: PropTypes.string,
