@@ -7,17 +7,14 @@ import {
   menuItemContainerStyle,
   activeMenuItemContainerStyle,
   disabledMenuItemContainerStyle,
-} from './utils';
+  linkStyle,
+  disabledTextStyle,
+} from './styles';
 
 const menuItemContainer = createDataProp('menu-item-container');
 
 const menuItemHeight = css`
   min-height: 36px;
-`;
-
-const linkStyle = css`
-  text-decoration: none;
-  color: inherit;
 `;
 
 const titleTextStyle = css`
@@ -48,10 +45,6 @@ const descriptionTextStyle = css`
   ${menuItemContainer.selector}:focus & {
     color: ${uiColors.blue.dark2};
   }
-`;
-
-const disbaledTextStyle = css`
-  color: ${uiColors.gray.light1};
 `;
 
 interface SharedMenuItemProps {
@@ -136,7 +129,7 @@ const MenuItem = React.forwardRef(
           <div
             className={cx(titleTextStyle, {
               [activetitleTextStyle]: active,
-              [disbaledTextStyle]: disabled,
+              [disabledTextStyle]: disabled,
             })}
           >
             {children}
@@ -145,7 +138,7 @@ const MenuItem = React.forwardRef(
             <div
               className={cx(descriptionTextStyle, {
                 [activeDescriptionTextStyle]: active,
-                [disbaledTextStyle]: disabled,
+                [disabledTextStyle]: disabled,
               })}
             >
               {description}

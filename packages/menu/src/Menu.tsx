@@ -185,7 +185,7 @@ function Menu({
 
   const popoverRef: React.RefObject<HTMLUListElement> = useRef(null);
 
-  const setFocus = el => {
+  const setFocus = (el: HTMLElement) => {
     setFocused(el);
     el?.focus();
   };

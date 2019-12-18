@@ -3,19 +3,29 @@ import IconButton from '@leafygreen-ui/icon-button';
 import Icon from '@leafygreen-ui/icon';
 import { css, cx } from '@leafygreen-ui/emotion';
 import { uiColors } from '@leafygreen-ui/palette';
-import { HTMLElementProps } from '@leafygreen-ui/lib';
+import { HTMLElementProps, createDataProp } from '@leafygreen-ui/lib';
 
 import {
   menuItemContainerStyle,
   activeMenuItemContainerStyle,
   disabledMenuItemContainerStyle,
-} from './utils';
+  linkStyle,
+  disabledTextStyle,
+} from './styles';
 
-const subMenuHeight = css`
+const subMenuContainer = createDataProp('sub-menu-container');
+
+const subMenuStyle = css`
+  flex-direction: row;
   min-height: 56px;
+  border-bottom: 1px solid ${uiColors.gray.light2};
+  background-color: ${uiColors.gray.light3};
+  align-items: center;
 `;
 
-const linkStyle = css``;
+const subMenuOpenStyle = css`
+  background-color: ${uiColors.white};
+`;
 
 const closedIconStyle = css`
   transform: rotate(180deg);
@@ -25,10 +35,14 @@ const closedIconStyle = css`
 
 const openIconStyle = css`
   margin-top: 2px;
-  color: ${uiColors.gray.base};
+  color: ${uiColors.gray.dark2};
 `;
 
-const disabledStyle = css``;
+const contentContainer = css`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+`;
 
 const mainTextStyle = css`
   display: flex;
@@ -52,15 +66,59 @@ const activeDescriptionTextStyle = css`
   color: ${uiColors.green.dark2};
 `;
 
-const disbaledTextStyle = css``;
+const iconButtonStyle = css`
+  background-color: ${uiColors.gray.light3};
+  transition: background-color 150ms ease-in-out;
+
+  ${subMenuContainer.selector}:focus & {
+    background-color: ${uiColors.blue.light3};
+    transition: background-color 150ms ease-in-out;
+  }
+
+  ${subMenuContainer.selector}:hover & {
+    background-color: ${uiColors.gray.light2};
+    transition: background-color 150ms ease-in-out;
+  }
+`;
+
+const openIconButtonStyle = css`
+  background-color: ${uiColors.white};
+  transition: background-color 150ms ease-in-out;
+`;
+
+const mainIconStyle = css`
+  color: ${uiColors.gray.base};
+  margin-right: 15px;
+`;
+
+const activeIconStyle = css`
+  color: ${uiColors.green.base};
+`;
+
+const ulStyle = css`
+  list-style: none;
+  padding: 0px;
+`;
+
+const menuItemStyles = css`
+  padding-left: 50px;
+  border-bottom: 1px solid ${uiColors.gray.light2};
+`;
+
+const fullWidth = css`
+  width: 100%;
+`;
+
+// type Glyph = typeof glyphs[keyof typeof glyphs];
 
 interface SharedSubMenuProps {
-  open: boolean;
-  setOpen: React.SetStateAction<boolean>;
+  open?: boolean;
+  setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   className?: string;
   description: string;
   disabled?: boolean;
   active?: boolean;
+  glyph?: string;
 }
 
 interface LinkSubMenuProps extends HTMLElementProps<'a'>, SharedSubMenuProps {
@@ -87,21 +145,23 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
     description,
     href,
     children,
-    open,
     setOpen,
     onKeyDown,
     className,
     onClick,
+    glyph,
+    open = false,
     active = false,
     disabled = false,
     ...rest
   } = props;
 
-  const iconButtonRef = useRef(null);
+  const iconButtonRef = useRef();
 
   const renderedSubMenuItem = (Root: React.ElementType<any> = 'button') => (
     <li role="none">
       <Root
+        {...subMenuContainer.prop}
         {...rest}
         onKeyDown={onKeyDown}
         role="menuitem"
@@ -110,32 +170,60 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
         // aria-expanded="false"
         tabIndex={-1}
         ref={ref as RefObject<any>}
-        onClick={() => {
+        onClick={(e: React.MouseEvent) => {
           onClick;
 
           if (iconButtonRef?.current?.contains(e.target)) {
+            console.log(e);
             e.preventDefault();
           }
         }}
         className={cx(
           menuItemContainerStyle,
-          subMenuHeight,
+          subMenuStyle,
           linkStyle,
           {
             [activeMenuItemContainerStyle]: active,
             [disabledMenuItemContainerStyle]: disabled,
+            [subMenuOpenStyle]: open,
           },
           className,
         )}
       >
-        <div className={cx(mainTextStyle, { [activeMainTextStyle]: active })}>
-          {title}
+        {glyph && (
+          <Icon
+            glyph={glyph}
+            size="xlarge"
+            className={cx(mainIconStyle, {
+              [activeIconStyle]: active,
+            })}
+          />
+        )}
+        <div className={fullWidth}>
+          <div className={contentContainer}>
+            <div
+              className={cx(mainTextStyle, {
+                [activeMainTextStyle]: active,
+              })}
+            >
+              {title}
+            </div>
+          </div>
+          <div
+            className={cx(descriptionTextStyle, {
+              [activeDescriptionTextStyle]: active,
+              [disabledTextStyle]: disabled,
+            })}
+          >
+            {description}
+          </div>
+        </div>
+        <span>
           <IconButton
             ref={iconButtonRef}
             ariaLabel="CaretDown"
-            onClick={() => {
-              setOpen(!open);
-            }}
+            onClick={() => setOpen && setOpen(!open)}
+            className={cx(iconButtonStyle, { [openIconButtonStyle]: open })}
           >
             <Icon
               glyph="CaretUp"
@@ -145,26 +233,15 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
               })}
             />
           </IconButton>
-        </div>
-        {description && (
-          <div
-            className={cx(descriptionTextStyle, {
-              [activeDescriptionTextStyle]: active,
-              [disbaledTextStyle]: disabled,
-            })}
-          >
-            {description}
-          </div>
-        )}
+        </span>
       </Root>
-
       {open && (
-        <ul
-          className={css`
-            list-style: none;
-          `}
-        >
-          {children}
+        <ul className={ulStyle}>
+          {React.Children.map(children as React.ReactElement, child => {
+            return React.cloneElement(child, {
+              className: menuItemStyles,
+            });
+          })}
         </ul>
       )}
     </li>

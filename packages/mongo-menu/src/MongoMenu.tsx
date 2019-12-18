@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@leafygreen-ui/button';
 import Icon from '@leafygreen-ui/icon';
+import { LogoMark } from '@leafygreen-ui/logo';
 import {
   Menu,
   SubMenu,
@@ -95,6 +96,8 @@ const menuNameStyle = css`
 
 const activeMenuButtonStyle = css`
   background-color: ${uiColors.gray.light2};
+  color: ${uiColors.gray.dark3};
+  font-weight: bolder;
 `;
 
 const truncate = css`
@@ -111,16 +114,32 @@ const closedIconStyle = css`
 
 const openIconStyle = css`
   margin-top: 2px;
-  color: ${uiColors.gray.base};
+  color: ${uiColors.gray.dark2};
+`;
+
+const menuContainer = css`
+  width: 300px;
 `;
 
 const headerStyle = css`
-  padding: 25px 15px;
+  padding: 25px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   background-color: ${uiColors.gray.dark3};
   color: ${uiColors.white};
+  max-width: 100%;
+`;
+
+const logoMarkStyle = css`
+  background-color: white;
+  width: 43px;
+  height: 43px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
 `;
 
 const nameStyle = css`
@@ -136,10 +155,12 @@ const descriptionStyle = css`
   text-decoration: none;
   margin-top: 0px;
   margin-bottom: 15px;
+  max-width: 100%;
 `;
 
 const logoutContainer = css`
   height: 56px;
+  background-color: ${uiColors.gray.light3};
 `;
 
 const menuItems = [
@@ -154,6 +175,7 @@ const menuItems = [
       'Organizations',
       'Two-Factor Authorization',
     ],
+    glyph: 'Cloud',
   },
   {
     displayName: 'University',
@@ -161,6 +183,7 @@ const menuItems = [
     href: 'https://university.mongodb.com',
     slug: 'university',
     subMenu: ['Video Preferences'],
+    glyph: 'Laptop',
   },
   {
     displayName: 'Cloud Support',
@@ -168,6 +191,7 @@ const menuItems = [
     href: 'https://support.mongodb.com',
     slug: 'support',
     subMenu: ['User Preferences'],
+    glyph: 'Support',
   },
 ];
 
@@ -250,19 +274,16 @@ function MongoMenu({
         />
       </div>
 
-      <Menu
-        open={open}
-        setOpen={setOpen}
-        className={css`
-          width: 300px;
-        `}
-      >
+      <Menu open={open} setOpen={setOpen} className={menuContainer}>
         <div className={headerStyle}>
+          <span className={logoMarkStyle}>
+            <LogoMark height={30} />
+          </span>
           <h3 className={cx(nameStyle, truncate)}>{name}</h3>
           <p className={cx(descriptionStyle, truncate)}>{email}</p>
           <FocusableMenuItem>
             <Button href={accountURL} as="a">
-              MongoDB Account
+              Manage your MongoDB Account
             </Button>
           </FocusableMenuItem>
         </div>
@@ -279,6 +300,7 @@ function MongoMenu({
               target="_blank"
               rel="noopener noreferrer"
               title={el.displayName}
+              glpyh={el.glyph}
             >
               {el.subMenu.map(sub => (
                 <MenuItem key={sub}>{sub}</MenuItem>

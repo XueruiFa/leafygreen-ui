@@ -57,16 +57,19 @@ function Test() {
   return (
     <Menu trigger={<button>trigger</button>}>
       <MenuItem>test 1</MenuItem>
-      <SubMenu title="Cloud" description="https://google.com">
+      <SubMenu
+        title="Cloud"
+        description="https://google.com"
+        glpyh="Cloud"
+        active={true}
+      >
         <MenuItem>Test 1</MenuItem>
         <MenuItem>Test 2</MenuItem>
       </SubMenu>
-      <MenuItem>test 2</MenuItem>
-      <SubMenu title="Support">
+      <SubMenu title="Support" description="https://google.com" glpyh="Support">
         <MenuItem>Test 1</MenuItem>
       </SubMenu>
-      <MenuItem>test 3</MenuItem>
-      <SubMenu title="Support">
+      <SubMenu title="Education" description="https://google.com">
         <MenuItem>Test 1</MenuItem>
         <MenuItem>Test 2</MenuItem>
         <MenuItem>Test 3</MenuItem>

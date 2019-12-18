@@ -2,6 +2,7 @@ import { css } from '@leafygreen-ui/emotion';
 import { uiColors } from '@leafygreen-ui/palette';
 
 const indentation = 15;
+const leftBar = 5;
 
 export const menuItemContainerStyle = css`
   display: flex;
@@ -25,7 +26,7 @@ export const menuItemContainerStyle = css`
   &:before {
     content: '';
     position: absolute;
-    width: 3px;
+    width: ${leftBar}px;
     top: 0;
     bottom: 0;
     left: -1px;
@@ -35,10 +36,10 @@ export const menuItemContainerStyle = css`
 
   &:hover {
     text-decoration: none;
-    background-color: ${uiColors.gray.light3};
+    background-color: ${uiColors.gray.light2};
 
     &:before {
-      background-color: ${uiColors.gray.light2};
+      background-color: ${uiColors.gray.light1};
     }
   }
 
@@ -99,4 +100,13 @@ export const disabledMenuItemContainerStyle = css`
   &:hover:before {
     background-color: unset;
   }
+`;
+
+export const linkStyle = css`
+  text-decoration: none;
+  color: inherit;
+`;
+
+export const disabledTextStyle = css`
+  color: ${uiColors.gray.light1};
 `;
