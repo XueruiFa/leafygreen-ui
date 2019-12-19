@@ -306,7 +306,7 @@ function MongoMenu({
               }}
               key={el.displayName}
               active={el.slug === activeProduct}
-              href={el.href}
+              href={el.slug === activeProduct ? null : el.href}
               description={el.description}
               target="_blank"
               rel="noopener noreferrer"

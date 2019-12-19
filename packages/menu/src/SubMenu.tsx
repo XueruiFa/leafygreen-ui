@@ -1,6 +1,6 @@
 import React, { RefObject, useRef } from 'react';
 import IconButton from '@leafygreen-ui/icon-button';
-import Icon from '@leafygreen-ui/icon';
+import Icon, { glyphs } from '@leafygreen-ui/icon';
 import { css, cx } from '@leafygreen-ui/emotion';
 import { uiColors } from '@leafygreen-ui/palette';
 import { HTMLElementProps, createDataProp } from '@leafygreen-ui/lib';
@@ -15,6 +15,11 @@ import {
 
 const subMenuContainer = createDataProp('sub-menu-container');
 
+const liStyle = css`
+  position: relative;
+  overflow: hidden;
+`;
+
 const subMenuStyle = css`
   flex-direction: row;
   min-height: 56px;
@@ -25,6 +30,10 @@ const subMenuStyle = css`
 
 const subMenuOpenStyle = css`
   background-color: ${uiColors.white};
+
+  &:hover {
+    background-color: ${uiColors.gray.light2};
+  }
 `;
 
 const closedIconStyle = css`
@@ -68,6 +77,7 @@ const activeDescriptionTextStyle = css`
 
 const iconButtonStyle = css`
   position: absolute;
+  z-index: 1;
   right: 8px;
   top: ${52 / 2 - 22 / 2}px;
   margin: auto;
@@ -106,14 +116,21 @@ const ulStyle = css`
 
 const menuItemStyles = css`
   padding-left: 50px;
-  border-bottom: 1px solid ${uiColors.gray.light2};
 `;
 
 const fullWidth = css`
   width: 100%;
 `;
 
-// type Glyph = typeof glyphs[keyof typeof glyphs];
+const menuItemBorder = css`
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: ${uiColors.gray.light2};
+  bottom: 0;
+`;
+
+type Glyph = typeof glyphs[keyof typeof glyphs];
 
 interface SharedSubMenuProps {
   open?: boolean;
@@ -122,7 +139,7 @@ interface SharedSubMenuProps {
   description: string;
   disabled?: boolean;
   active?: boolean;
-  glyph?: string;
+  glyph?: Glyph;
 }
 
 interface LinkSubMenuProps extends HTMLElementProps<'a'>, SharedSubMenuProps {
@@ -185,12 +202,7 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
   };
 
   const renderedSubMenuItem = (Root: React.ElementType<any> = 'button') => (
-    <li
-      role="none"
-      className={css`
-        position: relative;
-      `}
-    >
+    <li role="none" className={liStyle}>
       <Root
         {...subMenuContainer.prop}
         {...rest}
@@ -198,8 +210,6 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
         role="menuitem"
         href={href}
         aria-haspopup="true"
-        // aria-expanded="false"
-        tabIndex={-1}
         ref={ref as RefObject<any>}
         onClick={onRootClick}
         className={cx(
@@ -258,10 +268,15 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
         />
       </IconButton>
       {open && (
-        <ul className={ulStyle}>
+        <ul className={ulStyle} role="menu" aria-label={title}>
           {React.Children.map(children as React.ReactElement, child => {
             return React.cloneElement(child, {
-              children: <div>{child.props.children}</div>,
+              children: (
+                <>
+                  {child.props.children}
+                  <div className={menuItemBorder}></div>
+                </>
+              ),
               className: cx(menuItemStyles, child.props.className),
               onClick: (
                 e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &

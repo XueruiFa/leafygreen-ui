@@ -73,7 +73,7 @@ export const activeMenuItemContainerStyle = css`
   }
 
   &:hover {
-    background-color: ${uiColors.green.light3};
+    background-color: ${uiColors.gray.light3};
     color: ${uiColors.green.dark3};
 
     &:before {
