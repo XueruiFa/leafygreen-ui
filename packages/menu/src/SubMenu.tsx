@@ -67,15 +67,19 @@ const activeDescriptionTextStyle = css`
 `;
 
 const iconButtonStyle = css`
+  position: absolute;
+  right: 8px;
+  top: ${52 / 2 - 22 / 2}px;
+  margin: auto;
   background-color: ${uiColors.gray.light3};
   transition: background-color 150ms ease-in-out;
 
-  ${subMenuContainer.selector}:focus & {
+  ${subMenuContainer.selector}:focus + & {
     background-color: ${uiColors.blue.light3};
     transition: background-color 150ms ease-in-out;
   }
 
-  ${subMenuContainer.selector}:hover & {
+  ${subMenuContainer.selector}:hover + & {
     background-color: ${uiColors.gray.light2};
     transition: background-color 150ms ease-in-out;
   }
@@ -156,10 +160,37 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
     ...rest
   } = props;
 
-  const iconButtonRef = useRef();
+  const iconButtonRef: React.MutableRefObject<HTMLElement | null> = useRef(
+    null,
+  );
+
+  const onRootClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &
+      React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    if (iconButtonRef?.current?.contains(e.target as Node)) {
+      e.preventDefault();
+    } else {
+      if (onClick) {
+        onClick(e);
+      }
+    }
+  };
+
+  const onIconButtonClick = (e: React.MouseEvent) => {
+    e.nativeEvent.stopImmediatePropagation();
+    if (setOpen) {
+      setOpen(!open);
+    }
+  };
 
   const renderedSubMenuItem = (Root: React.ElementType<any> = 'button') => (
-    <li role="none">
+    <li
+      role="none"
+      className={css`
+        position: relative;
+      `}
+    >
       <Root
         {...subMenuContainer.prop}
         {...rest}
@@ -170,14 +201,7 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
         // aria-expanded="false"
         tabIndex={-1}
         ref={ref as RefObject<any>}
-        onClick={(e: React.MouseEvent) => {
-          onClick;
-
-          if (iconButtonRef?.current?.contains(e.target)) {
-            console.log(e);
-            e.preventDefault();
-          }
-        }}
+        onClick={onRootClick}
         className={cx(
           menuItemContainerStyle,
           subMenuStyle,
@@ -218,28 +242,36 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
             {description}
           </div>
         </div>
-        <span>
-          <IconButton
-            ref={iconButtonRef}
-            ariaLabel="CaretDown"
-            onClick={() => setOpen && setOpen(!open)}
-            className={cx(iconButtonStyle, { [openIconButtonStyle]: open })}
-          >
-            <Icon
-              glyph="CaretUp"
-              className={cx({
-                [openIconStyle]: open,
-                [closedIconStyle]: !open,
-              })}
-            />
-          </IconButton>
-        </span>
       </Root>
+      <IconButton
+        ref={iconButtonRef}
+        ariaLabel="CaretDown"
+        onClick={onIconButtonClick}
+        className={cx(iconButtonStyle, { [openIconButtonStyle]: open })}
+      >
+        <Icon
+          glyph="CaretUp"
+          className={cx({
+            [openIconStyle]: open,
+            [closedIconStyle]: !open,
+          })}
+        />
+      </IconButton>
       {open && (
         <ul className={ulStyle}>
           {React.Children.map(children as React.ReactElement, child => {
             return React.cloneElement(child, {
-              className: menuItemStyles,
+              children: <div>{child.props.children}</div>,
+              className: cx(menuItemStyles, child.props.className),
+              onClick: (
+                e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &
+                  React.MouseEvent<HTMLButtonElement, MouseEvent>,
+              ) => {
+                child.props?.onClick?.(e);
+                if (onClick) {
+                  onClick(e);
+                }
+              },
             });
           })}
         </ul>

@@ -11,8 +11,13 @@ storiesOf('MongoMenu', module).add('Default', () => (
     }}
     activeProduct={select(
       'activeProduct',
-      Object.values(Product) as Array<Size>,
+      Object.values(Product),
       Product.Atlas,
+    )}
+    accountURL={select(
+      'accountURL',
+      ['https://cloud.mongodb.com/v2#/account', ''],
+      'https://cloud.mongodb.com/v2#/account',
     )}
   />
 ));

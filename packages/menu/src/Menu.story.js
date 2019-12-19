@@ -63,16 +63,16 @@ function Test() {
         glpyh="Cloud"
         active={true}
       >
-        <MenuItem>Test 1</MenuItem>
-        <MenuItem>Test 2</MenuItem>
+        <MenuItem>Cloud 1</MenuItem>
+        <MenuItem>Cloud 2</MenuItem>
       </SubMenu>
       <SubMenu title="Support" description="https://google.com" glpyh="Support">
-        <MenuItem>Test 1</MenuItem>
+        <MenuItem>Support 1</MenuItem>
       </SubMenu>
       <SubMenu title="Education" description="https://google.com">
-        <MenuItem>Test 1</MenuItem>
-        <MenuItem>Test 2</MenuItem>
-        <MenuItem>Test 3</MenuItem>
+        <MenuItem>Education 1</MenuItem>
+        <MenuItem>Education 2</MenuItem>
+        <MenuItem>Education 3</MenuItem>
       </SubMenu>
     </Menu>
   );

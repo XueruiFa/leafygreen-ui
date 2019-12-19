@@ -88,23 +88,10 @@ function Menu({
 }: MenuProps) {
   const refs: Array<HTMLElement> = [];
   const hasSetInitialFocus = useRef(false);
+  const hasSetInitialOpen = useRef(false);
   const [currentSubMenu, setCurrentSubMenu] = useState<React.ReactElement<
     HTMLLIElement
   > | null>(null);
-
-  // When a SubMenu becomes open, it's set to currentSubMenu, and we focus on the first child.
-  useEffect(() => {
-    if (!currentSubMenu) {
-      return;
-    }
-
-    const focusedRefIndex = refs.indexOf(focused);
-    const subMenuFirstChild = refs[focusedRefIndex + 1];
-
-    if (subMenuFirstChild) {
-      subMenuFirstChild.focus();
-    }
-  }, [currentSubMenu]);
 
   const setRef = (ref: HTMLElement) => {
     if (ref == null) {
@@ -119,26 +106,34 @@ function Menu({
     }
   };
 
-  function updateChildren(children: any): Array<React.ReactElement> {
+  function updateChildren(
+    children: any,
+    open = false,
+  ): Array<React.ReactElement> {
     return React.Children.map(children, (child, index) => {
       const onFocus = (e: Event) => {
         setFocused(e.target as HTMLElement);
-        child.props.onFocus?.(e);
       };
 
       if (isComponentType(child, 'SubMenu') && !child.props.disabled) {
+        if (child.props.active && !hasSetInitialOpen.current && open) {
+          setCurrentSubMenu(child);
+          hasSetInitialOpen.current = true;
+        }
+
         const isCurrentSubMenu = currentSubMenu === child;
 
         return React.cloneElement(child, {
           ref: setRef,
           open: isCurrentSubMenu,
           setOpen: (state: boolean) => {
-            if (isCurrentSubMenu === state) {
-              return;
+            const foundSubMenu = refs.find(el =>
+              el.innerHTML.includes(child.props.title),
+            );
+
+            if (foundSubMenu) {
+              setFocused(foundSubMenu);
             }
-
-            setFocus(refs[index]);
-
             setCurrentSubMenu(state ? child : null);
           },
           onKeyDown: (e: KeyboardEvent) => {
@@ -175,13 +170,32 @@ function Menu({
     });
   }
 
-  const updatedChildren = updateChildren(children);
-
   const [focused, setFocused] = useState<HTMLElement>(refs[0] || null);
   const isControlled = typeof controlledOpen === 'boolean';
   const [uncontrolledOpen, uncontrolledSetOpen] = useState(false);
   const open = isControlled ? controlledOpen : uncontrolledOpen;
   const setOpen = isControlled ? controlledSetOpen : uncontrolledSetOpen;
+
+  // When a SubMenu becomes open, it's set to currentSubMenu, and we focus on the first child.
+  useEffect(() => {
+    if (!currentSubMenu) {
+      return;
+    }
+
+    const focusedRefIndex = refs.indexOf(focused);
+    const subMenuFirstChild = refs[focusedRefIndex + 1];
+
+    if (subMenuFirstChild) {
+      subMenuFirstChild.focus();
+    }
+  }, [currentSubMenu]);
+
+  const updatedChildren = React.useMemo(() => updateChildren(children, open), [
+    children,
+    focused,
+    currentSubMenu,
+    open,
+  ]);
 
   const popoverRef: React.RefObject<HTMLUListElement> = useRef(null);
 
@@ -193,6 +207,7 @@ function Menu({
   useMemo(() => {
     if (open === false) {
       hasSetInitialFocus.current = false;
+      hasSetInitialOpen.current = false;
     }
   }, [open]);
 
