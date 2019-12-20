@@ -93,30 +93,34 @@ function Menu({
     HTMLLIElement
   > | null>(null);
 
-  const setRef = (ref: HTMLElement) => {
-    if (ref == null) {
-      return;
-    }
+  function updateChildren(children: any): Array<React.ReactElement> {
+    return React.Children.map(children, child => {
+      if (child.props.disabled) {
+        return child;
+      }
 
-    refs.push(ref);
+      let currentChildRef: HTMLElement | null = null;
 
-    if (open && refs.length === 1 && hasSetInitialFocus.current === false) {
-      setFocus(refs[0]);
-      hasSetInitialFocus.current = true;
-    }
-  };
+      const setRef = (ref: HTMLElement) => {
+        if (ref == null) {
+          return;
+        }
 
-  function updateChildren(
-    children: any,
-    open = false,
-  ): Array<React.ReactElement> {
-    return React.Children.map(children, (child, index) => {
-      const onFocus = (e: Event) => {
-        setFocused(e.target as HTMLElement);
+        refs.push(ref);
+        currentChildRef = ref;
+
+        if (open && hasSetInitialFocus.current === false) {
+          setFocus(refs[0]);
+          hasSetInitialFocus.current = true;
+        }
       };
 
-      if (isComponentType(child, 'SubMenu') && !child.props.disabled) {
-        if (child.props.active && !hasSetInitialOpen.current && open) {
+      const onFocus = ({ target }: { target: HTMLElement }) => {
+        setFocused(target);
+      };
+
+      if (isComponentType(child, 'SubMenu')) {
+        if (child.props.active && !hasSetInitialOpen.current) {
           setCurrentSubMenu(child);
           hasSetInitialOpen.current = true;
         }
@@ -127,13 +131,10 @@ function Menu({
           ref: setRef,
           open: isCurrentSubMenu,
           setOpen: (state: boolean) => {
-            const foundSubMenu = refs.find(el =>
-              el.innerHTML.includes(child.props.title),
-            );
-
-            if (foundSubMenu) {
-              setFocused(foundSubMenu);
+            if (currentChildRef) {
+              setFocused(currentChildRef);
             }
+
             setCurrentSubMenu(state ? child : null);
           },
           onKeyDown: (e: KeyboardEvent) => {
@@ -151,7 +152,7 @@ function Menu({
       }
 
       if (
-        (isComponentType(child, 'MenuItem') && !child.props.disabled) ||
+        isComponentType(child, 'MenuItem') ||
         isComponentType(child, 'FocusableMenuItem')
       ) {
         return React.cloneElement(child, {
@@ -160,7 +161,7 @@ function Menu({
         });
       }
 
-      if (child.props?.children && !child.props.disabled) {
+      if (child.props.children) {
         return React.cloneElement(child, {
           children: updateChildren(child.props.children),
         });
@@ -190,7 +191,7 @@ function Menu({
     }
   }, [currentSubMenu]);
 
-  const updatedChildren = React.useMemo(() => updateChildren(children, open), [
+  const updatedChildren = React.useMemo(() => updateChildren(children), [
     children,
     focused,
     currentSubMenu,
