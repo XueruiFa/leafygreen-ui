@@ -66,15 +66,6 @@ const activeMainTextStyle = css`
   color: ${uiColors.green.dark3};
 `;
 
-const descriptionTextStyle = css`
-  font-size: 12px;
-  color: ${uiColors.blue.base};
-`;
-
-const activeDescriptionTextStyle = css`
-  color: ${uiColors.green.dark2};
-`;
-
 const iconButtonStyle = css`
   position: absolute;
   z-index: 1;
@@ -130,13 +121,13 @@ const menuItemBorder = css`
   bottom: 0;
 `;
 
-type Glyph = typeof glyphs[keyof typeof glyphs];
+type Glyph = keyof typeof glyphs;
 
 interface SharedSubMenuProps {
   open?: boolean;
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   className?: string;
-  description: string;
+  description: string | React.ReactElement;
   disabled?: boolean;
   active?: boolean;
   glyph?: Glyph;
@@ -243,12 +234,7 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
               {title}
             </div>
           </div>
-          <div
-            className={cx(descriptionTextStyle, {
-              [activeDescriptionTextStyle]: active,
-              [disabledTextStyle]: disabled,
-            })}
-          >
+          <div className={cx({ [disabledTextStyle]: disabled })}>
             {description}
           </div>
         </div>

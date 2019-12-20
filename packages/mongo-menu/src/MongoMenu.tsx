@@ -298,20 +298,35 @@ function MongoMenu({
         </div>
         <MenuSeparator />
         {menuItems.map(el => {
+          const isActive = el.slug === activeProduct;
           return (
             <SubMenu
+              key={el.displayName}
               onClick={e => {
                 onProductChange(e);
                 setOpen(false);
               }}
-              key={el.displayName}
-              active={el.slug === activeProduct}
-              href={el.slug === activeProduct ? null : el.href}
-              description={el.description}
+              active={isActive}
+              href={isActive ? null : el.href}
+              description={
+                <div
+                  className={css`
+                    font-size: 12px;
+                    color: ${isActive
+                      ? uiColors.gray.light1
+                      : uiColors.blue.base};
+                  `}
+                >
+                  {el.description}
+                </div>
+              }
               target="_blank"
               rel="noopener noreferrer"
               title={el.displayName}
               glyph={el.glyph}
+              className={css`
+                pointer-events: ${isActive ? 'none' : 'inherit'};
+              `}
             >
               {el.subMenu.map(sub => (
                 <MenuItem key={sub}>{sub}</MenuItem>
