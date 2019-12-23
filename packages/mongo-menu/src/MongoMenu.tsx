@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@leafygreen-ui/button';
-import Icon from '@leafygreen-ui/icon';
+import Icon, { glyphs } from '@leafygreen-ui/icon';
 import { LogoMark } from '@leafygreen-ui/logo';
 import {
   Menu,
@@ -163,7 +163,19 @@ const logoutContainer = css`
   background-color: ${uiColors.gray.light3};
 `;
 
-const menuItems = [
+interface MenuItemInterface {
+  displayName: 'Atlas' | 'University' | 'Cloud Support';
+  href:
+    | 'https://cloud.mongodb.com'
+    | 'https://university.mongodb.com'
+    | 'https://support.mongodb.com';
+  description: string;
+  slug: Product;
+  subMenu: Array<string>;
+  glyph: Glyph;
+}
+
+const menuItems: Array<MenuItemInterface> = [
   {
     displayName: 'Atlas',
     description: 'cloud.mongodb.com',
@@ -204,6 +216,8 @@ const Product = {
 type Product = typeof Product[keyof typeof Product] | '';
 
 export { Product };
+
+type Glyph = keyof typeof glyphs;
 
 interface MongoMenuProps {
   /**
@@ -260,6 +274,7 @@ function MongoMenu({
   onProductChange = () => {},
 }: MongoMenuProps) {
   const [open, setOpen] = useState(false);
+
   return (
     <button className={buttonReset} onClick={() => setOpen(curr => !curr)}>
       <div
@@ -307,7 +322,7 @@ function MongoMenu({
                 setOpen(false);
               }}
               active={isActive}
-              href={isActive ? null : el.href}
+              href={el.href}
               description={
                 <div
                   className={css`

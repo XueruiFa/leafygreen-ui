@@ -59,6 +59,10 @@ const mainTextStyle = css`
   justify-content: space-between;
   font-size: 14px;
   color: ${uiColors.gray.dark3};
+
+  ${subMenuContainer.selector}:focus & {
+    color: ${uiColors.blue.dark3};
+  }
 `;
 
 const activeMainTextStyle = css`
@@ -94,6 +98,14 @@ const openIconButtonStyle = css`
 const mainIconStyle = css`
   color: ${uiColors.gray.base};
   margin-right: 15px;
+
+  ${subMenuContainer.selector}:focus > & {
+    color: ${uiColors.blue.base};
+  }
+
+  ${subMenuContainer.selector}:hover > & {
+    color: ${uiColors.gray.dark1};
+  }
 `;
 
 const activeIconStyle = css`

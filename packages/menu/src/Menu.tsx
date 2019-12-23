@@ -94,8 +94,9 @@ function Menu({
   > | null>(null);
 
   function updateChildren(children: any): Array<React.ReactElement> {
+    console.log('hi', children);
     return React.Children.map(children, child => {
-      if (child.props.disabled) {
+      if (child.props?.disabled) {
         return child;
       }
 
@@ -161,7 +162,7 @@ function Menu({
         });
       }
 
-      if (child.props.children) {
+      if (child.props?.children) {
         return React.cloneElement(child, {
           children: updateChildren(child.props.children),
         });
@@ -186,9 +187,7 @@ function Menu({
     const focusedRefIndex = refs.indexOf(focused);
     const subMenuFirstChild = refs[focusedRefIndex + 1];
 
-    if (subMenuFirstChild) {
-      subMenuFirstChild.focus();
-    }
+    subMenuFirstChild?.focus();
   }, [currentSubMenu]);
 
   const updatedChildren = React.useMemo(() => updateChildren(children), [
