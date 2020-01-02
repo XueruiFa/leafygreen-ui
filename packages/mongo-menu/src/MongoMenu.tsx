@@ -14,90 +14,89 @@ import { createDataProp } from '@leafygreen-ui/lib';
 import { uiColors } from '@leafygreen-ui/palette';
 import { css, cx } from '@leafygreen-ui/emotion';
 
+const buttonDataProp = createDataProp('button-data-prop');
 const iconRef = createDataProp('icon-ref');
+const subMenuContainer = createDataProp('sub-menu-container');
 
-const buttonReset = css`
-  appearance: none;
-  background: none;
-  border: 0px;
+const triggerWrapper = css`
+  display: inline-block;
   position: relative;
-  padding: 0px;
+  z-index: 0;
+`;
 
-  &:hover:before {
+const interactionRing = css`
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  border-radius: 50px;
+  transform: scale(0.9, 0.8);
+  transition: transform 150ms ease-in-out;
+  background-color: ${uiColors.gray.light2};
+
+  ${buttonDataProp.selector}:hover ~ & {
     transform: scale(1);
   }
 
+  ${buttonDataProp.selector}:active ~ & {
+    transform: scale(1);
+  }
+
+  ${buttonDataProp.selector}:focus ~ & {
+    background-color: #63b0d0;
+    transform: scale(1);
+  }
+`;
+
+const baseButtonStyles = css`
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  position: relative;
+  height: 30px;
+  padding-left: 12px;
+  padding-right: 12px;
+  border: 1px solid ${uiColors.gray.light2};
+  background-color: ${uiColors.white};
+  border-radius: 14.5px;
+  transition: background 150ms ease-in-out;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: ${uiColors.gray.dark2};
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 1;
+
   &:active {
-    outline: none;
     color: ${uiColors.gray.dark2};
 
-    &:before {
-      transform: scale(1);
-    }
-
-    & ${iconRef.selector} {
+    ${iconRef.selector} {
       color: ${uiColors.gray.dark1};
     }
   }
 
   &:focus {
     outline: none;
-
-    &:before {
-      background-color: #63b0d0;
-      transform: scale(1);
-    }
   }
 
   &::-moz-focus-inner {
     border: 0;
   }
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    bottom: -2px;
-    left: -2px;
-    right: -2px;
-    border-radius: 50px;
-    transform: scale(0.9, 0.8);
-    transition: transform 150ms ease-in-out;
-    background-color: ${uiColors.gray.light2};
-  }
 `;
 
-const menuButtonStyle = css`
-  height: 29px;
-  padding-left: 14px;
-  padding-right: 14px;
-  border: 1px solid ${uiColors.gray.light1};
-  background-color: ${uiColors.white};
-  border-radius: 14.5px;
-  cursor: pointer;
-  transition: background 150ms ease-in-out;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: ${uiColors.gray.dark2};
-  font-size: 12px;
-  position: relative;
-
-  &:focus {
-    outline: none;
-  }
+const openBaseButtonStyle = css`
+  background-color: ${uiColors.gray.light2};
+  color: ${uiColors.gray.dark3};
+  font-weight: bold;
 `;
 
 const menuNameStyle = css`
-  margin-right: 2px;
+  margin-right: 24px;
   margin-left: 2px;
   max-width: 162px;
-`;
-
-const activeMenuButtonStyle = css`
-  background-color: ${uiColors.gray.light2};
-  color: ${uiColors.gray.dark3};
-  font-weight: bolder;
 `;
 
 const truncate = css`
@@ -117,12 +116,12 @@ const openIconStyle = css`
   color: ${uiColors.gray.dark2};
 `;
 
-const menuContainer = css`
+const menuStyle = css`
   width: 300px;
 `;
 
 const headerStyle = css`
-  padding: 25px 10px;
+  padding: 24px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,7 +130,7 @@ const headerStyle = css`
   max-width: 100%;
 `;
 
-const logoMarkStyle = css`
+const logoMarkBackground = css`
   background-color: white;
   width: 43px;
   height: 43px;
@@ -139,7 +138,7 @@ const logoMarkStyle = css`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 `;
 
 const nameStyle = css`
@@ -147,6 +146,41 @@ const nameStyle = css`
   font-weight: bold;
   line-height: 22px;
   margin: 0px;
+  max-width: 100%;
+`;
+
+const subMenuContainerStyle = css`
+  pointer-events: inherit;
+`;
+
+const subMenuActiveContainerStyle = css`
+  pointer-events: none;
+`;
+
+const productLinkStyle = css`
+  font-size: 12px;
+  color: ${uiColors.blue.base};
+  display: flex;
+  align-items: flex-end;
+
+  ${subMenuContainer.selector}:hover & {
+    color: ${uiColors.blue.dark2};
+  }
+`;
+
+const activeProductLinkStyle = css`
+  color: ${uiColors.gray.light1};
+`;
+
+const productLinkIconStyle = css`
+  opacity: 0;
+  transform: translate3d(-3px, 0, 0px);
+  transition: all 100ms ease-in;
+
+  ${subMenuContainer.selector}:hover & {
+    opacity: 1;
+    transform: translate3d(3px, 0, 0px);
+  }
 `;
 
 const descriptionStyle = css`
@@ -154,7 +188,7 @@ const descriptionStyle = css`
   line-height: 14px;
   text-decoration: none;
   margin-top: 0px;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
   max-width: 100%;
 `;
 
@@ -163,7 +197,7 @@ const logoutContainer = css`
   background-color: ${uiColors.gray.light3};
 `;
 
-interface MenuItemInterface {
+interface SubMenuInterface {
   displayName: 'Atlas' | 'University' | 'Cloud Support';
   href:
     | 'https://cloud.mongodb.com'
@@ -175,7 +209,7 @@ interface MenuItemInterface {
   glyph: Glyph;
 }
 
-const menuItems: Array<MenuItemInterface> = [
+const subMenus: Array<SubMenuInterface> = [
   {
     displayName: 'Atlas',
     description: 'cloud.mongodb.com',
@@ -275,14 +309,67 @@ function MongoMenu({
 }: MongoMenuProps) {
   const [open, setOpen] = useState(false);
 
-  return (
-    <button className={buttonReset} onClick={() => setOpen(curr => !curr)}>
+  const renderSubMenu = ({
+    slug,
+    href,
+    displayName,
+    glyph,
+    subMenu,
+    description,
+  }: SubMenuInterface) => {
+    const isActive = slug === activeProduct;
+
+    const subMenuDescription = (
       <div
-        className={cx(menuButtonStyle, {
-          [activeMenuButtonStyle]: open,
+        className={cx(productLinkStyle, {
+          [activeProductLinkStyle]: isActive,
         })}
       >
-        <span className={cx(menuNameStyle, truncate)}>{name}</span>
+        {description}
+        <Icon
+          size="small"
+          glyph="CaretRight"
+          className={productLinkIconStyle}
+        />
+      </div>
+    );
+
+    return (
+      <SubMenu
+        {...subMenuContainer.prop}
+        key={displayName}
+        active={isActive}
+        href={href}
+        description={subMenuDescription}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={displayName}
+        glyph={glyph}
+        onClick={e => {
+          onProductChange(e);
+          setOpen(false);
+        }}
+        className={cx(subMenuContainerStyle, {
+          [subMenuActiveContainerStyle]: isActive,
+        })}
+      >
+        {subMenu.map(sub => (
+          <MenuItem key={sub}>{sub}</MenuItem>
+        ))}
+      </SubMenu>
+    );
+  };
+
+  return (
+    <div className={triggerWrapper}>
+      <button
+        {...buttonDataProp.prop}
+        className={cx(baseButtonStyles, { [openBaseButtonStyle]: open })}
+        onClick={() => setOpen(curr => !curr)}
+      >
+        <span className={cx(menuNameStyle, truncate)}>
+          {name.split(' ')[0]}
+        </span>
 
         <Icon
           {...iconRef.prop}
@@ -292,75 +379,43 @@ function MongoMenu({
             [closedIconStyle]: !open,
           })}
         />
-      </div>
+      </button>
+      <div className={interactionRing} />
 
-      <Menu open={open} setOpen={setOpen} className={menuContainer}>
+      <Menu open={open} setOpen={setOpen} className={menuStyle}>
         <div className={headerStyle}>
-          <span className={logoMarkStyle}>
+          <div className={logoMarkBackground}>
             <LogoMark height={30} />
-          </span>
+          </div>
+
           <h3 className={cx(nameStyle, truncate)}>{name}</h3>
+
           <p className={cx(descriptionStyle, truncate)}>{email}</p>
+
           <FocusableMenuItem>
-            <Button
-              href={accountURL || undefined}
-              as={accountURL ? 'a' : 'button'}
-              disabled={!accountURL}
-            >
+            <Button href={accountURL} disabled={!accountURL}>
               Manage your MongoDB Account
             </Button>
           </FocusableMenuItem>
         </div>
+
         <MenuSeparator />
-        {menuItems.map(el => {
-          const isActive = el.slug === activeProduct;
-          return (
-            <SubMenu
-              key={el.displayName}
-              onClick={e => {
-                onProductChange(e);
-                setOpen(false);
-              }}
-              active={isActive}
-              href={el.href}
-              description={
-                <div
-                  className={css`
-                    font-size: 12px;
-                    color: ${isActive
-                      ? uiColors.gray.light1
-                      : uiColors.blue.base};
-                  `}
-                >
-                  {el.description}
-                </div>
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              title={el.displayName}
-              glyph={el.glyph}
-              className={css`
-                pointer-events: ${isActive ? 'none' : 'inherit'};
-              `}
-            >
-              {el.subMenu.map(sub => (
-                <MenuItem key={sub}>{sub}</MenuItem>
-              ))}
-            </SubMenu>
-          );
-        })}
+
+        {subMenus.map(renderSubMenu)}
+
         <MenuSeparator />
+
         <MenuItem onClick={onLogout} className={logoutContainer}>
           Logout
         </MenuItem>
       </Menu>
-    </button>
+    </div>
   );
 }
 
 MongoMenu.displayName = 'MongoMenu';
 
-const slugs = menuItems.map(mi => mi.slug);
+const slugs = subMenus.map(mi => mi.slug);
 
 MongoMenu.propTypes = {
   user: PropTypes.objectOf(PropTypes.string),

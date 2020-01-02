@@ -9,7 +9,9 @@ import { transparentize } from 'polished';
 
 const rootMenuStyle = css`
   width: 200px;
-  border-radius: 3px;
+  // border-radius: 3px;
+  border-radius: 4px;
+  overflow: hidden;
   box-shadow: 0 2px 6px ${transparentize(0.8, uiColors.black)};
   background-color: ${uiColors.white};
   list-style: none;
@@ -94,7 +96,6 @@ function Menu({
   > | null>(null);
 
   function updateChildren(children: any): Array<React.ReactElement> {
-    console.log('hi', children);
     return React.Children.map(children, child => {
       if (child.props?.disabled) {
         return child;

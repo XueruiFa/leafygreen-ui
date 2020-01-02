@@ -1,10 +1,10 @@
 import React, { RefObject, useRef } from 'react';
+import { Transition } from 'react-transition-group';
 import IconButton from '@leafygreen-ui/icon-button';
 import Icon, { glyphs } from '@leafygreen-ui/icon';
 import { css, cx } from '@leafygreen-ui/emotion';
 import { uiColors } from '@leafygreen-ui/palette';
 import { HTMLElementProps, createDataProp } from '@leafygreen-ui/lib';
-
 import {
   menuItemContainerStyle,
   activeMenuItemContainerStyle,
@@ -26,6 +26,7 @@ const subMenuStyle = css`
   border-bottom: 1px solid ${uiColors.gray.light2};
   background-color: ${uiColors.gray.light3};
   align-items: center;
+  justify-content: flex-start;
 `;
 
 const subMenuOpenStyle = css`
@@ -37,20 +38,12 @@ const subMenuOpenStyle = css`
 `;
 
 const closedIconStyle = css`
-  transform: rotate(180deg);
   transition: color 200ms ease-in-out;
   color: ${uiColors.gray.base};
 `;
 
 const openIconStyle = css`
-  margin-top: 2px;
   color: ${uiColors.gray.dark2};
-`;
-
-const contentContainer = css`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
 `;
 
 const mainTextStyle = css`
@@ -97,7 +90,10 @@ const openIconButtonStyle = css`
 
 const mainIconStyle = css`
   color: ${uiColors.gray.base};
-  margin-right: 15px;
+  // 15px of padding from MenuItem + 32px width of SVG + 13px = 60px
+  // which is the padding-left for children of SubMenus.
+  margin-right: 13px;
+  flex-shrink: 0;
 
   ${subMenuContainer.selector}:focus > & {
     color: ${uiColors.blue.base};
@@ -110,19 +106,22 @@ const mainIconStyle = css`
 
 const activeIconStyle = css`
   color: ${uiColors.green.base};
+
+  ${subMenuContainer.selector}:hover > & {
+    color: ${uiColors.green.base};
+  }
 `;
 
 const ulStyle = css`
   list-style: none;
-  padding: 0px;
+  padding: 0;
+  height: 0;
+  overflow: hidden;
+  transition: height 150ms ease-in-out;
 `;
 
 const menuItemStyles = css`
-  padding-left: 50px;
-`;
-
-const fullWidth = css`
-  width: 100%;
+  padding-left: 60px;
 `;
 
 const menuItemBorder = css`
@@ -163,6 +162,8 @@ function usesLinkElement(
   return props.href != null;
 }
 
+const subMenuItemHeight = 36;
+
 const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
   const {
     title,
@@ -188,19 +189,10 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
     e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &
       React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
-    if (iconButtonRef?.current?.contains(e.target as Node)) {
+    if (iconButtonRef?.current?.contains(e.target as HTMLElement)) {
       e.preventDefault();
-    } else {
-      if (onClick) {
-        onClick(e);
-      }
-    }
-  };
-
-  const onIconButtonClick = (e: React.MouseEvent) => {
-    e.nativeEvent.stopImmediatePropagation();
-    if (setOpen) {
-      setOpen(!open);
+    } else if (onClick) {
+      onClick(e);
     }
   };
 
@@ -236,59 +228,83 @@ const SubMenu = React.forwardRef((props: SubMenuProps, ref) => {
             })}
           />
         )}
-        <div className={fullWidth}>
-          <div className={contentContainer}>
-            <div
-              className={cx(mainTextStyle, {
-                [activeMainTextStyle]: active,
-              })}
-            >
-              {title}
-            </div>
+
+        <div>
+          <div
+            className={cx(mainTextStyle, {
+              [activeMainTextStyle]: active,
+            })}
+          >
+            {title}
           </div>
+
           <div className={cx({ [disabledTextStyle]: disabled })}>
             {description}
           </div>
         </div>
       </Root>
+
       <IconButton
         ref={iconButtonRef}
-        ariaLabel="CaretDown"
-        onClick={onIconButtonClick}
+        ariaLabel={open ? 'Caret Up' : 'Caret Down'}
         className={cx(iconButtonStyle, { [openIconButtonStyle]: open })}
+        onClick={(e: React.MouseEvent) => {
+          e.nativeEvent.stopImmediatePropagation();
+
+          if (setOpen) {
+            setOpen(!open);
+          }
+        }}
       >
         <Icon
-          glyph="CaretUp"
-          className={cx({
-            [openIconStyle]: open,
-            [closedIconStyle]: !open,
-          })}
+          glyph={open ? 'CaretUp' : 'CaretDown'}
+          className={open ? openIconStyle : closedIconStyle}
         />
       </IconButton>
-      {open && (
-        <ul className={ulStyle} role="menu" aria-label={title}>
-          {React.Children.map(children as React.ReactElement, child => {
-            return React.cloneElement(child, {
-              children: (
-                <>
-                  {child.props.children}
-                  <div className={menuItemBorder}></div>
-                </>
-              ),
-              className: cx(menuItemStyles, child.props.className),
-              onClick: (
-                e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &
-                  React.MouseEvent<HTMLButtonElement, MouseEvent>,
-              ) => {
-                child.props?.onClick?.(e);
-                if (onClick) {
-                  onClick(e);
-                }
-              },
-            });
-          })}
-        </ul>
-      )}
+
+      <Transition
+        in={open}
+        timeout={{
+          enter: 0,
+          exit: 150,
+        }}
+        mountOnEnter
+        unmountOnExit
+      >
+        {(state: string) => (
+          <ul
+            className={cx(ulStyle, {
+              [css`
+                height: ${subMenuItemHeight *
+                  React.Children.toArray(children).length}px;
+              `]: state === 'entered',
+            })}
+            role="menu"
+            aria-label={title}
+          >
+            {React.Children.map(children as React.ReactElement, child => {
+              return React.cloneElement(child, {
+                children: (
+                  <>
+                    {child.props.children}
+                    <div className={menuItemBorder}></div>
+                  </>
+                ),
+                className: cx(menuItemStyles, child.props.className),
+                onClick: (
+                  e: React.MouseEvent<HTMLAnchorElement, MouseEvent> &
+                    React.MouseEvent<HTMLButtonElement, MouseEvent>,
+                ) => {
+                  child.props?.onClick?.(e);
+                  if (onClick) {
+                    onClick(e);
+                  }
+                },
+              });
+            })}
+          </ul>
+        )}
+      </Transition>
     </li>
   );
 

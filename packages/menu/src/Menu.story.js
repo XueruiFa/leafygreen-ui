@@ -60,13 +60,13 @@ function Test() {
       <SubMenu
         title="Cloud"
         description="https://google.com"
-        glpyh="Cloud"
+        glyph="Cloud"
         active={true}
       >
         <MenuItem>Cloud 1</MenuItem>
         <MenuItem>Cloud 2</MenuItem>
       </SubMenu>
-      <SubMenu title="Support" description="https://google.com" glpyh="Support">
+      <SubMenu title="Support" description="https://google.com" glyph="Support">
         <MenuItem>Support 1</MenuItem>
       </SubMenu>
       <SubMenu title="Education" description="https://google.com">
